@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zadanie 2</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(135deg, #ff3b3b 0%, #a12fbf 50%, #6a1b9a 100%);
+      color: white;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden; /* zapobiega tworzeniu się dodatkowego tła po bokach */
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 28px;
+      border-radius: 16px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      width: min(520px, 92%);
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      font-size: 22px;
+    }
+
+    p.sub {
+      opacity: 0.92;
+      margin-bottom: 24px;
+    }
+
+    textarea, input {
+      width: 100%;
+      border: 2px solid #000;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 18px;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.95);
+      color: #000;
+    }
+
+    textarea {
+      resize: none;
+      height: 100px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      margin-top: 16px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(0, 0, 0, 0.9);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .error {
+      color: #fff;
+      background: rgba(255, 0, 0, 0.14);
+      padding: 8px;
+      margin-top: 12px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Pytanie 1</h1>
+
+    <textarea id="question" readonly>Jest to miejsce, którego liczba 2 górnych rzędów okien wynosi:
+	4+5×2−6÷2+9−3÷3+6−9×2÷6+3−5+6=</textarea>
+
+    <input type="text" id="answer" />
+
+    <div>
+      <button id="checkAnswer">Sprawdź odpowiedź</button>
+    </div>
+
+    <div id="msg" style="min-height:28px;margin-top:12px;"></div>
+  </div>
+
+  <script>
+    (function(){
+      const CORRECT_ANSWER = "26";
+
+      const answerInput = document.getElementById('answer');
+      const msg = document.getElementById('msg');
+      const btn = document.getElementById('checkAnswer');
+
+      function showMessage(text, isError){
+        msg.textContent = text;
+        msg.className = isError ? 'error' : '';
+      }
+
+      function checkAnswer(){
+        const val = answerInput.value.trim();
+        if(!val){ showMessage('Wpisz odpowiedź.', true); return; }
+        if(val.toLowerCase() === CORRECT_ANSWER.toLowerCase()){
+          showMessage('Poprawna odpowiedź! Przechodzę dalej...', false);
+          setTimeout(()=> window.location.href = 'zadanie3.html', 1000);
+        } else {
+          showMessage('Nieprawidłowa odpowiedź. Spróbuj ponownie.', true);
+        }
+      }
+
+      btn.addEventListener('click', checkAnswer);
+      answerInput.addEventListener('keydown', e=>{
+        if(e.key === 'Enter') checkAnswer();
+      });
+    })();
+  </script>
+</body>
+</html>
