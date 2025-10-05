@@ -1,0 +1,230 @@
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!-- Co ty tu robisz? Wypierdalaj w podskokach, idź banany prostować -->
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zadanie 1 — Wpisz PIN</title>
+  <style>
+    :root{--size:72px}
+    html,body{height:100%;margin:0}
+    body{
+      display:flex;align-items:center;justify-content:center;
+      background: linear-gradient(135deg,#ff3b3b 0%, #a12fbf 50%, #6a1b9a 100%);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    .card{
+      background: rgba(255,255,255,0.06);
+      padding:28px;border-radius:16px;backdrop-filter: blur(6px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      text-align:center; color: #fff; width: min(520px, 92%);
+    }
+    h1{margin:0 0 8px;font-size:20px}
+    p.sub{margin:0 0 20px;opacity:0.92}
+
+    form.pin-form{display:flex;gap:12px;justify-content:center;align-items:center}
+    .pin-input{
+      width: var(--size); height: var(--size);
+      border: 2px solid #000; border-radius:14px;
+      font-size:30px; text-align:center; outline:none;
+      background: rgba(255,255,255,0.95); color:#000;
+      box-sizing:border-box; padding:0;
+      -moz-appearance: textfield;
+    }
+    .pin-input:focus{box-shadow:0 0 0 3px rgba(0,0,0,0.08)}
+
+    .actions{margin-top:18px}
+    button{padding:8px 14px;border-radius:10px;border:none;background:rgba(0,0,0,0.9);color:#fff;font-weight:600;cursor:pointer}
+
+    .error{color:#fff;background:rgba(255,0,0,0.14);padding:8px;margin-top:12px;border-radius:8px;display:inline-block}
+
+    .disabled { opacity: 0.5; pointer-events: none; }
+
+    @keyframes shake{0%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}100%{transform:translateX(0)}}
+    .shake{animation:shake 420ms linear}
+
+    #lockOverlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: white;
+      font-size: 22px;
+      z-index: 9999;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      background-size: cover;
+      background-position: center;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+    }
+
+    #lockOverlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    #countdown {
+      font-size: 36px;
+      font-weight: bold;
+      margin-top: 20px;
+      background: rgba(0,0,0,0.5);
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
+
+    @media (max-width:420px){:root{--size:56px}}
+  </style>
+</head>
+<body>
+  <div class="card" role="main">
+    <h1>Wpisz PIN</h1>
+    <p class="sub">Wprowadź czterocyfrowy PIN, każda cyfra w osobnej kratce.</p>
+
+    <form class="pin-form" id="pinForm" autocomplete="off" onsubmit="return false;" aria-label="Formularz PIN">
+      <input inputmode="numeric" pattern="\d*" maxlength="1" class="pin-input" id="d0" aria-label="cyfra 1" />
+      <input inputmode="numeric" pattern="\d*" maxlength="1" class="pin-input" id="d1" aria-label="cyfra 2" />
+      <input inputmode="numeric" pattern="\d*" maxlength="1" class="pin-input" id="d2" aria-label="cyfra 3" />
+      <input inputmode="numeric" pattern="\d*" maxlength="1" class="pin-input" id="d3" aria-label="cyfra 4" />
+    </form>
+
+    <div class="actions">
+      <button id="checkBtn" type="button">Sprawdź PIN</button>
+    </div>
+
+    <div id="msg" role="status" aria-live="polite" style="min-height:28px"></div>
+  </div>
+
+  <div id="lockOverlay">
+    <p>Strona została zablokowana na 30 sekund...</p>
+    <div id="countdown">30</div>
+  </div>
+
+  <audio id="miawSound" src="miaw.mp3" loop></audio>
+
+  <script>
+    (function(){
+      const CORRECT = '0906';
+      const inputs = Array.from(document.querySelectorAll('.pin-input'));
+      const msg = document.getElementById('msg');
+      const btn = document.getElementById('checkBtn');
+      const overlay = document.getElementById('lockOverlay');
+      const miawSound = document.getElementById('miawSound');
+      const countdown = document.getElementById('countdown');
+      let locked = false;
+      let timer;
+
+      inputs[0].focus();
+
+      inputs.forEach((el, idx)=>{
+        el.addEventListener('input', ()=>{
+          const v = el.value.replace(/\D/g, '');
+          el.value = v.slice(0,1);
+          if(v.length>0 && idx < inputs.length-1) inputs[idx+1].focus();
+        });
+
+        el.addEventListener('keydown', (e)=>{
+          if(e.key === 'Backspace' && !el.value && idx>0){
+            inputs[idx-1].focus();
+            inputs[idx-1].value='';
+          }
+          if(e.key === 'ArrowLeft' && idx>0){ inputs[idx-1].focus(); }
+          if(e.key === 'ArrowRight' && idx < inputs.length-1){ inputs[idx+1].focus(); }
+          if(e.key === 'Enter') checkPin();
+        });
+      });
+
+      document.getElementById('pinForm').addEventListener('paste', (e)=>{
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+        for(let i=0;i<4;i++) inputs[i].value = text[i] || '';
+        const firstEmpty = inputs.find(i=>!i.value);
+        (firstEmpty || inputs[inputs.length-1]).focus();
+      });
+
+      function showMessage(text, isError){
+        msg.textContent = text;
+        msg.className = isError ? 'error' : '';
+      }
+
+      function clearAll(){ inputs.forEach(i=>i.value=''); inputs[0].focus(); }
+
+      function startCountdown(duration){
+        let remaining = duration;
+        countdown.textContent = remaining;
+        timer = setInterval(()=>{
+          remaining--;
+          countdown.textContent = remaining;
+          if(remaining <= 0){
+            clearInterval(timer);
+          }
+        },1000);
+      }
+
+      function lockPage(){
+        locked = true;
+        overlay.style.backgroundImage = 'url(maxresdefault.jpg)';
+        overlay.classList.add('active');
+        miawSound.currentTime = 0;
+        miawSound.play();
+        inputs.forEach(i=>i.disabled = true);
+        btn.disabled = true;
+        btn.classList.add('disabled');
+        showMessage('Strona zablokowana na 30 sekund', true);
+        startCountdown(30);
+
+        setTimeout(()=>{
+          locked = false;
+          overlay.classList.remove('active');
+          miawSound.pause();
+          clearInterval(timer);
+          inputs.forEach(i=>i.disabled = false);
+          btn.disabled = false;
+          btn.classList.remove('disabled');
+          clearAll();
+          showMessage('Możesz spróbować ponownie', false);
+        }, 30000);
+      }
+
+      function wrongFeedback(){
+        const card = document.querySelector('.card');
+        card.classList.remove('shake');
+        void card.offsetWidth;
+        card.classList.add('shake');
+        showMessage('Nieprawidłowy PIN — spróbuj ponownie', true);
+        setTimeout(()=>{ clearAll(); }, 420);
+        lockPage();
+      }
+
+      function checkPin(){
+        if(locked) return;
+        const val = inputs.map(i=>i.value || '').join('');
+        if(val.length < 4){ showMessage('Uzupełnij wszystkie pola', true); return; }
+        if(val === CORRECT){
+          showMessage('PIN poprawny — przekierowanie...', false);
+          window.location.href = 'zadanie2.html';
+        } else {
+          wrongFeedback();
+        }
+      }
+
+      btn.addEventListener('click', checkPin);
+      inputs[inputs.length-1].addEventListener('keydown', (e)=>{ if(e.key === 'Enter') checkPin(); });
+    })();
+  </script>
+</body>
+</html>
