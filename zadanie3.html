@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Zadanie 3</title>
   <style>
     html, body {
@@ -19,42 +19,81 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      overflow: hidden;
+      overflow-x: hidden;
       padding: 20px;
     }
 
     h1 {
-      font-size: 40px;
-      margin-bottom: 10px;
+      font-size: clamp(26px, 5vw, 42px);
+      margin-bottom: 12px;
+      animation: fadeIn 1.2s ease both;
     }
 
     p {
       opacity: 0.9;
-      font-size: 18px;
+      font-size: clamp(14px, 3vw, 18px);
       margin-bottom: 40px;
+      animation: fadeIn 1.5s ease both;
     }
 
     .cats {
       display: flex;
-      gap: 30px;
+      gap: 20px;
       flex-wrap: wrap;
       justify-content: center;
     }
 
     .cats img {
-      width: 250px;
-      height: 250px;
+      width: clamp(120px, 40vw, 200px);
+      height: clamp(120px, 40vw, 200px);
       object-fit: contain;
       border: none;
       box-shadow: none;
-      border-radius: 0;
-      background: none;
+      opacity: 0;
+      transform: translateY(30px) scale(0.9);
+      animation: bounceIn 1s ease forwards;
+    }
+
+    /* Animacje */
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Opóźnienia dla kolejnych kotów */
+    .cats img:nth-child(1) { animation-delay: 0.2s; }
+    .cats img:nth-child(2) { animation-delay: 0.4s; }
+    .cats img:nth-child(3) { animation-delay: 0.6s; }
+    .cats img:nth-child(4) { animation-delay: 0.8s; }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;
+      }
+      .cats {
+        gap: 14px;
+      }
     }
   </style>
 </head>
 <body>
   <h1>Gratulacje ukończyliście zadanie!</h1>
-  <p>PS. Powodzenia w dalszej części zadań!</p>
+  <p>ps. Erykowi nie chciało się robić więcej stron 😄</p>
 
   <div class="cats">
     <img src="200w.gif" alt="Kot 1">
